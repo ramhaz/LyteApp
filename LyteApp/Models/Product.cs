@@ -1,6 +1,4 @@
-﻿namespace LyteApp;
-
-    
+﻿namespace LyteApp.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +7,7 @@ public class Product
 {
     [Key]
     [Column("id")]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     [Column("name")]
     [Required]
@@ -26,6 +24,6 @@ public class Product
     [Column("image_url")]
     [MaxLength(300)]
     public string ImageUrl { get; set; } = string.Empty;
-}
-    
 
+    public List<Ingredient> Ingredients { get; set; } = new();
+}

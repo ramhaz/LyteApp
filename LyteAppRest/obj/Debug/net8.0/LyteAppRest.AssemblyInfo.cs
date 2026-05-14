@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LyteAppRest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42c9fdaa39ef3538025093120ff182e7b7a678de")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+21431ac85d10670657535438f80619c61b35b452")]
 [assembly: System.Reflection.AssemblyProductAttribute("LyteAppRest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LyteAppRest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
