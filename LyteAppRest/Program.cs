@@ -1,8 +1,11 @@
 using LyteApp.Data;
-
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var supabaseProjectId = builder.Configuration["Supabase:ProjectId"];
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -13,8 +16,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// JWT Authentication med Supabase (ECC/JWKS)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://{supabaseProjectId}.supabase.co/auth/v1";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"https://{supabaseProjectId}.supabase.co/auth/v1",
+            ValidateAudience = true,
+            ValidAudience = "authenticated",
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+        };
+        options.MetadataAddress = $"https://{supabaseProjectId}.supabase.co/auth/v1/.well-known/openid-configuration";
+    });
 
-// cores princip 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -27,8 +46,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
-// building enviorment med swagger. deployment with or without serveracceptance 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -36,7 +53,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.Urls.Add("http://0.0.0.0:5179");
 
 app.Run();

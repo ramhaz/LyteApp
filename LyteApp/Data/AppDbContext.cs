@@ -1,3 +1,4 @@
+    using LyteApi.Models;
     using Microsoft.EntityFrameworkCore;
     using LyteApp.Models;
 
@@ -18,6 +19,10 @@
        
         public DbSet<HydrationPlan> HydrationPlans => Set<HydrationPlan>();
         
+        public DbSet<Challenge> Challenges { get; set; }
+        
+        public DbSet<UserChallenge> UserChallenges { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -34,6 +39,15 @@
                 .WithOne(l => l.HydrationPlan)
                 .HasForeignKey(l => l.PlanId)
                 .OnDelete(DeleteBehavior.Cascade);
+           
+            modelBuilder.Entity<UserChallenge>()
+                .HasIndex(uc => new { uc.UserId, uc.ChallengeId })
+                .IsUnique();
+
+            modelBuilder.Entity<UserChallenge>()
+                .HasOne(uc => uc.Challenge)
+                .WithMany()
+                .HasForeignKey(uc => uc.ChallengeId);
 
         }
     }

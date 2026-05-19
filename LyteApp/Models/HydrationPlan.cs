@@ -12,7 +12,7 @@ public class HydrationPlan
 
     [Column(name: "user_id")]
     [Required]
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
 
     [Column(name: "start_date")]
     [Required]

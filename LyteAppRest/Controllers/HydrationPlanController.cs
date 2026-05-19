@@ -18,7 +18,7 @@ public class HydrationPlanController : ControllerBase
 
     // GET /api/hydrationplan/active/{userId}
     [HttpGet("active/{userId}")]
-    public async Task<IActionResult> GetActivePlan(string userId)
+    public async Task<IActionResult> GetActivePlan(Guid userId)
     {
         var plan = await _db.HydrationPlans
             .FirstOrDefaultAsync(p => p.UserId == userId && p.IsActive);
@@ -29,46 +29,51 @@ public class HydrationPlanController : ControllerBase
         return Ok(plan);
     }
 
-    // POST /api/hydrationplan/start
     [HttpPost("start")]
     public async Task<IActionResult> StartPlan([FromBody] StartPlanRequest request)
     {
-        var existing = await _db.HydrationPlans
-            .AnyAsync(p => p.UserId == request.UserId && p.IsActive);
-
-        if (existing)
-            return BadRequest(new { message = "Du har allerede en aktiv plan." });
-
-        var plan = new HydrationPlan
+        try
         {
-            UserId = request.UserId,
-            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            IsActive = true,
-        };
+            var existing = await _db.HydrationPlans
+                .AnyAsync(p => p.UserId == request.UserId && p.IsActive);
 
-        _db.HydrationPlans.Add(plan);
-        await _db.SaveChangesAsync();
+            if (existing)
+                return BadRequest(new { message = "Du har allerede en aktiv plan." });
 
-        var logs = new List<HydrationLog>();
-        for (int day = 1; day <= 30; day++)
-        {
-            logs.Add(new HydrationLog
+            var plan = new HydrationPlan
             {
-                PlanId = plan.Id,
                 UserId = request.UserId,
-                DayNumber = day,
-                TargetMl = GetTargetMl(day),
-                LoggedMl = 0,
-                LogDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(day - 1)),
-            });
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                IsActive = true,
+            };
+
+            _db.HydrationPlans.Add(plan);
+            await _db.SaveChangesAsync();
+
+            var logs = new List<HydrationLog>();
+            for (int day = 1; day <= 30; day++)
+            {
+                logs.Add(new HydrationLog
+                {
+                    PlanId = plan.Id,
+                    UserId = request.UserId,
+                    DayNumber = day,
+                    TargetMl = GetTargetMl(day),
+                    LoggedMl = 0,
+                    LogDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(day - 1)),
+                });
+            }
+
+            _db.HydrationLogs.AddRange(logs);
+            await _db.SaveChangesAsync();
+
+            return Ok(plan);
         }
-
-        _db.HydrationLogs.AddRange(logs);
-        await _db.SaveChangesAsync();
-
-        return Ok(plan);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.InnerException?.Message ?? ex.Message });
+        }
     }
-
     private static int GetTargetMl(int dayNumber)
     {
         if (dayNumber <= 10) return 2000;

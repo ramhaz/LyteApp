@@ -16,7 +16,7 @@ public class HydrationLog
 
     [Column(name: "user_id")]
     [Required]
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
 
     [Column(name: "day_number")]
     [Required]
