@@ -25,9 +25,13 @@ public class Challenge
     [Column("points")]
     public int Points { get; set; }
 
+    [Column("category")]
+    public string Category { get; set; } = "hydration";
+
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
     [Column("created_at")]
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
